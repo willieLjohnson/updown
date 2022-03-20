@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2F635B6327E75D6B006B65E8 /* Useful.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F635B6227E75D6B006B65E8 /* Useful.swift */; };
 		2FFB22E427E51C3B00E8549D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FFB22E327E51C3B00E8549D /* AppDelegate.swift */; };
 		2FFB22E627E51C3B00E8549D /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 2FFB22E527E51C3B00E8549D /* GameScene.sks */; };
 		2FFB22E827E51C3B00E8549D /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 2FFB22E727E51C3B00E8549D /* Actions.sks */; };
@@ -38,6 +39,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2F635B6227E75D6B006B65E8 /* Useful.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Useful.swift; sourceTree = "<group>"; };
 		2FFB22E027E51C3B00E8549D /* updown.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = updown.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FFB22E327E51C3B00E8549D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2FFB22E527E51C3B00E8549D /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -106,6 +108,7 @@
 				2FFB22E527E51C3B00E8549D /* GameScene.sks */,
 				2FFB22E727E51C3B00E8549D /* Actions.sks */,
 				2FFB22E927E51C3B00E8549D /* GameScene.swift */,
+				2F635B6227E75D6B006B65E8 /* Useful.swift */,
 				2FFB22EB27E51C3B00E8549D /* GameViewController.swift */,
 				2FFB22ED27E51C3B00E8549D /* Main.storyboard */,
 				2FFB22F027E51C3F00E8549D /* Assets.xcassets */,
@@ -267,6 +270,7 @@
 				2FFB22EA27E51C3B00E8549D /* GameScene.swift in Sources */,
 				2FFB22EC27E51C3B00E8549D /* GameViewController.swift in Sources */,
 				2FFB22E427E51C3B00E8549D /* AppDelegate.swift in Sources */,
+				2F635B6327E75D6B006B65E8 /* Useful.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
