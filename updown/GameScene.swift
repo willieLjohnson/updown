@@ -70,6 +70,7 @@ class GameScene: SKScene {
 // MARK: - Private Methods
 private extension GameScene {
     func createWorld() {
+        self.physicsWorld.gravity = self.physicsWorld.gravity / 4
         let border  = SKPhysicsBody(edgeLoopFrom: self.frame)
         border.friction = 0
         border.restitution = 1
@@ -81,7 +82,7 @@ private extension GameScene {
     }
     
     func createBall() {
-        let ballSize = 15
+        let ballSize = 17
         ball = SKShapeNode(rectOf: CGSize(width: ballSize, height: ballSize))
         ball.fillColor = .black
         ball.name = "ballShape"
@@ -95,6 +96,7 @@ private extension GameScene {
         ball.physicsBody!.usesPreciseCollisionDetection = true
         ball.physicsBody!.restitution = 1
         ball.physicsBody!.friction = 0
+        ball.physicsBody!.angularDamping = 0.7
         
         let contactNode = SKShapeNode(circleOfRadius: 20)
         contactNode.name = "ball"
@@ -230,7 +232,7 @@ extension GameScene {
         super.touchesMoved(touches, with: event)
         for touch in touches {
             let location = touch.location(in: self) + CGPoint(x: 0, y: 30)
-            player.zRotation = lerp(player.zRotation, CGVector(dx: location.y - player.position.y, dy: location.x - player.position.x).normalized().angle / 2, 0.05)
+            player.zRotation = lerp(player.zRotation, CGVector(dx: location.y - player.position.y, dy: location.x - player.position.x).normalized().angle / 4, 0.1)
             player.position = location
 //            player.position.y = player.position.y.clamped(to: -self.size.height...0)
         }
@@ -255,17 +257,30 @@ extension GameScene: SKPhysicsContactDelegate {
     }
     
     func onContact(enemy: SKNode, other: SKNode, position: CGPoint) {
+        guard let enemy = enemy as? SKShapeNode else { return }
+        let enemyColor = enemy.fillColor.rgba
+        
         switch(other.name) {
         case "ball":
-            let ballCopy = ball.copy() as! SKShapeNode
-            ballCopy.fillColor = .systemRed
-            ballCopy.name = "enemyBall"
-            ballCopy.physicsBody!.collisionBitMask = enemy.physicsBody!.collisionBitMask
             guard let index = enemies.index(forKey: Int(enemy.zPosition)) else { return }
             enemies.remove(at: index)
             enemy.removeFromParent()
-//            addChild(ballCopy)
             self.addPoint(winner: self.player)
+
+            guard let ball = other as? SKShapeNode else { return }
+            guard let parent = ball.parent as? SKShapeNode else { return }
+
+            ball.run(.sequence([
+                .run({
+                    ball.fillColor = SKColor(red: enemyColor.red, green: enemyColor.green, blue: enemyColor.blue, alpha: 0.2)
+                    parent.fillColor = SKColor(red: enemyColor.red, green: enemyColor.green, blue: enemyColor.blue, alpha: 1)
+                }),
+                .wait(forDuration: 0.1),
+                .run({
+                    ball.fillColor = .clear
+                    parent.fillColor = .black
+                })
+            ]))
         case "edge":
             if self.frame.contains(position) {
                 enemy.position = position + enemy.frame.size
@@ -296,8 +311,8 @@ extension GameScene: SKPhysicsContactDelegate {
     }
     
     func onContact(ball: SKNode, other: SKNode, position: CGPoint) {
+        
         switch(other.name) {
-     
         default:
             return
         }
@@ -307,8 +322,7 @@ extension GameScene: SKPhysicsContactDelegate {
     func didBegin(_ contact: SKPhysicsContact) {
         guard let nodeA = contact.bodyA.node else { return }
         guard let nodeB = contact.bodyB.node else { return }
-        print(nodeA.name)
-        print(nodeB.name)
+
         switch(nodeA.name) {
         case "enemy":
             onContact(enemy: nodeA, other: nodeB, position: contact.contactPoint)
