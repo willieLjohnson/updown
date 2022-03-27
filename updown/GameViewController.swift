@@ -18,7 +18,7 @@ class GameViewController: UIViewController {
         sceneView.roundCorners(corners: [.topLeft, .topRight, .bottomLeft, .bottomRight], radius: 10)
         
         guard let scene = SKScene(fileNamed: "GameScene") else { return }
-
+//        self.view.backgroundColor = .black
         scene.scaleMode = .aspectFill
         scene.size = sceneView.bounds.size
         sceneView.presentScene(scene)
