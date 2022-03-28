@@ -77,6 +77,26 @@ extension SKColor {
             alpha: 1.0
         )
     }
+    
+
+    var hsba: (hue: CGFloat, saturation: CGFloat, brightness: CGFloat, alpha: CGFloat) {
+        var hue: CGFloat = 0
+        var saturation: CGFloat = 0
+        var brightness: CGFloat = 0
+        var alpha: CGFloat = 0
+        
+        getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
+        
+        return (hue, saturation, brightness, alpha)
+    }
+    
+    public static func randomHue(saturation: CGFloat, brightness: CGFloat, alpha: CGFloat) -> SKColor {
+        return SKColor(hue: .random(in: 0...1), saturation: saturation, brightness: brightness, alpha: alpha)
+    }
+    
+    public func hueWith(saturation: CGFloat, brightness: CGFloat, alpha: CGFloat) -> SKColor {
+        return SKColor(hue: self.hsba.hue, saturation: saturation, brightness: brightness, alpha: alpha)
+    }
 }
 
 // MARK: - CGSize
@@ -418,6 +438,8 @@ extension CGRect {
             CGPoint(x: 0, y: -self.size.height)
         }
     }
+    
+    var mid: CGPoint {.init(x: midX, y: midY) }
 }
 
 // MARK: - Color
@@ -430,5 +452,44 @@ extension UIColor {
         getRed(&red, green: &green, blue: &blue, alpha: &alpha)
 
         return (red, green, blue, alpha)
+    }
+}
+
+// MARK: - SKAction
+
+extension SKAction {
+    class func shake(initialPosition: CGPoint, duration: Float, amplitudeX: Int = 12, amplitudeY: Int = 3) -> SKAction {
+        let startingX = initialPosition.x
+        let startingY = initialPosition.y
+        let numberOfShakes = duration / 0.015
+        var actionsArray:[SKAction] = []
+        for _ in 1...Int(numberOfShakes) {
+            let newXPos = startingX + CGFloat(arc4random_uniform(UInt32(amplitudeX))) - CGFloat(amplitudeX / 2)
+            let newYPos = startingY + CGFloat(arc4random_uniform(UInt32(amplitudeY))) - CGFloat(amplitudeY / 2)
+            actionsArray.append(SKAction.move(to: CGPoint(x: newXPos, y: newYPos), duration: 0.015))
+        }
+        actionsArray.append(SKAction.move(to: initialPosition, duration: 0.015))
+        return SKAction.sequence(actionsArray)
+    }
+}
+
+// MARK: - SKSpriteNode
+extension SKShapeNode {
+    func addGlow(radius: Float = 30) {
+        let effectNode = SKEffectNode()
+        effectNode.name = "glowNode"
+        effectNode.shouldRasterize = true
+        addChild(effectNode)
+        let effect = SKShapeNode(rect: self.frame)
+        effect.strokeColor = self.strokeColor
+        effect.fillColor = self.fillColor
+        effect.blendMode = .add
+        effectNode.addChild(effect)
+        effectNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": radius])
+    }
+    
+    func removeGlow() {
+        guard let glowNode = childNode(withName: "glowNode") else { return }
+        glowNode.removeFromParent()
     }
 }
