@@ -178,11 +178,11 @@ private extension GameScene {
     }
     
     func createPlayer() {
-        player = SKShapeNode(rectOf: CGSize(width: 100, height: 15))
+        player = SKShapeNode(rectOf: CGSize(width: 115, height: 15), cornerRadius: 2.5)
         player.name = "player"
-        player.fillColor = .black
+        player.fillColor = .white
         player.strokeColor = .white
-        player.addGlow()
+
         
         let playerPhysicsBody = SKPhysicsBody(rectangleOf: player.frame.size)
         playerPhysicsBody.restitution = 2
@@ -199,7 +199,7 @@ private extension GameScene {
     }
     
 
-    
+    // TODO: - Create new enemy types or make enemy shape easier to adjust.
     func createEnemy(size: CGSize, position: CGPoint = .zero, color: SKColor = .red) {
         let enemy = SKShapeNode(rectOf: size)
         enemy.name = "enemy"
@@ -215,7 +215,7 @@ private extension GameScene {
         enemyPhysicsBody.usesPreciseCollisionDetection = true
         enemyPhysicsBody.categoryBitMask = EnemyCategory
         enemyPhysicsBody.contactTestBitMask = BallContactCategory
-        enemyPhysicsBody.collisionBitMask = EnemyCategory | BallCollisionCategory | WorldCategory
+        enemyPhysicsBody.collisionBitMask = EnemyCategory | BallCollisionCategory | WorldCategory | PlayerCategory
         enemy.physicsBody = enemyPhysicsBody
         enemy.zPosition = CGFloat(currentEnemyIndex)
         enemy.position = position
@@ -294,7 +294,7 @@ extension GameScene {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
-        player.fillColor = .black
+//        player.fillColor = .black
         playerIsMoving = false
     }
 }
@@ -337,6 +337,7 @@ extension GameScene: SKPhysicsContactDelegate {
 
             scoreLabelAttr[NSAttributedString.Key.strokeColor] = enemyColor.hueWith(saturation: 0.5, brightness: 1, alpha: 0.5)
             borderLine.strokeColor = enemyColor.hueWith(saturation: 0.5, brightness: 1, alpha: 1)
+            player.fillColor = enemyColor.hueWith(saturation: 1, brightness: 0.2, alpha: 0.5)
             player.strokeColor = enemyColor.hueWith(saturation: 0.5, brightness: 1, alpha: 1)
 
             ball.run(
@@ -344,10 +345,11 @@ extension GameScene: SKPhysicsContactDelegate {
                     .run({
                         ball.fillColor = enemyColor.hueWith(saturation: 1, brightness: 1, alpha: 0.5)
                         parent.fillColor = enemyColor.hueWith(saturation: 1, brightness: 1, alpha: 1)
+                   
                     }),
                     .wait(forDuration: 0.1),
                     .run({
-                        ball.fillColor = .clear
+                        ball.fillColor = enemyColor.hueWith(saturation: 1, brightness: 0.2, alpha: 0.5)
                         parent.fillColor = .clear
                         
                         ball.strokeColor = enemyColor.hueWith(saturation: 0.5, brightness: 1, alpha: 1)
