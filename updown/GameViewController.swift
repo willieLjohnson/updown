@@ -10,7 +10,6 @@ import SpriteKit
 import GameplayKit
 
 class GameViewController: UIViewController {
-    
     @IBOutlet weak var sceneView: SKView!
     
     override func viewDidLoad() {
@@ -18,7 +17,6 @@ class GameViewController: UIViewController {
         sceneView.roundCorners(corners: [.topLeft, .topRight, .bottomLeft, .bottomRight], radius: 10)
         
         guard let scene = SKScene(fileNamed: "GameScene") else { return }
-//        self.view.backgroundColor = .black
         scene.scaleMode = .aspectFill
         scene.size = sceneView.bounds.size
         sceneView.presentScene(scene)

@@ -6,7 +6,6 @@
 //
 
 import SpriteKit
-import GameplayKit
 
 let NoCategory: UInt32 = 1 << 0
 let PlayerCategory: UInt32 = 1 << 1
@@ -15,30 +14,19 @@ let BallCollisionCategory: UInt32 = 1 << 3
 let BallContactCategory: UInt32 = 1 << 4
 let WorldCategory: UInt32 = 1 << 5
 
-struct Sound {
-    var frequency: Float
-    var waveform: Signal
-}
 
 class GameScene: SKScene {
-    private let goalLine: CGFloat = 30.0
-    private let playerYPosition: CGFloat = 50.0
-    
     private var ball = SKShapeNode()
     private var player = SKShapeNode()
     private var scoreLabel = SKLabelNode()
-
     private var borderLine = SKShapeNode()
 
-    
     private var enemies = [Int: SKShapeNode]()
-    
     private var currentEnemyIndex = 0
     
     private var score = 0
     
     private var dragDistance: CGVector?
-    
     private var playerIsMoving: Bool = false
     
     private let bounceSound = Sound(frequency: 1046 / 5, waveform: Oscillator.sine)
@@ -206,7 +194,7 @@ private extension GameScene {
         playerPhysicsBody.collisionBitMask = WorldCategory | BallCollisionCategory | EnemyCategory
         playerPhysicsBody.contactTestBitMask = BallContactCategory | BallCollisionCategory
         player.physicsBody = playerPhysicsBody
-        player.position.y = (-worldFrame.height/2) + playerYPosition
+        player.position.y = (-worldFrame.height/2) + 50
         addChild(player)
     }
     
@@ -218,7 +206,6 @@ private extension GameScene {
         enemy.fillColor = color
         enemy.strokeColor = color.hueWith(saturation: 0.5, brightness: 1, alpha: 1)
         enemy.addGlow()
-        
 
         let enemyPhysicsBody = SKPhysicsBody(rectangleOf: enemy.frame.size)
         enemyPhysicsBody.restitution = 1
@@ -269,12 +256,11 @@ private extension GameScene {
     
     private func updateScores() {
         scoreLabel.attributedText = NSMutableAttributedString(string: "\(score)", attributes: scoreLabelAttr)
-//        scoreLabel.run(.sequence([.scale(to: 1.5, duration: 0.005), .wait(forDuration: 0.1), .scale(to: 1, duration: 0.025)]))
         scoreLabel.run(.shake(initialPosition: .zero, duration: 0.1, amplitudeX: .random(in: 20...50), amplitudeY: .random(in: 20...50)))
     }
     
-    func playSound(_ sound: Sound, volume: Float = 0.5) {
-        Oscillator.amplitude = 0.5
+    func playSound(_ sound: Sound, volume: Float = 1) {
+        Oscillator.amplitude = 1
         Synth.shared.frequency = sound.frequency
         Synth.shared.setWaveformTo(sound.waveform)
         Synth.shared.volume = volume
@@ -303,7 +289,6 @@ extension GameScene {
             let location = touch.location(in: self) + CGPoint(x: 0, y: 30)
             player.zRotation = lerp(player.zRotation, CGVector(dx: location.y - player.position.y, dy: location.x - player.position.x).normalized().angle / 4, 0.1)
             player.position = location
-//            player.position.y = player.position.y.clamped(to: -self.size.height...0)
         }
     }
     
@@ -331,7 +316,6 @@ extension GameScene: SKPhysicsContactDelegate {
         
         switch(other.name) {
         case "ball":
-
             enemy.removeGlow()
 
             enemy.physicsBody!.categoryBitMask = 0
@@ -455,42 +439,3 @@ extension GameScene: SKPhysicsContactDelegate {
     }
 }
 
-enum HapticStrength {
-    case selection
-    case light
-    case medium
-    case heavy
-    case error
-    case success
-    case warning
-}
-
-
-// MARK: - Haptics
-extension GameScene {
-    func vibrate(_ strength: HapticStrength = .selection) {
-        switch strength {
-        case .light:
-            let generator = UIImpactFeedbackGenerator(style: .light)
-            generator.impactOccurred()
-        case .medium:
-            let generator = UIImpactFeedbackGenerator(style: .medium)
-            generator.impactOccurred()
-        case .heavy:
-            let generator = UIImpactFeedbackGenerator(style: .heavy)
-            generator.impactOccurred()
-        case .error:
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.error)
-        case .success:
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
-        case .warning:
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.warning)
-        default:
-            let generator = UISelectionFeedbackGenerator()
-            generator.selectionChanged()
-        }
-    }
-}

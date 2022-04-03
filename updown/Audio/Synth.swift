@@ -8,11 +8,19 @@
 
 import AVFoundation
 
+struct Sound {
+    var frequency: Float
+    var waveform: Signal
+}
+
+
 class Synth {
     
     // MARK: Properties
     
     public static let shared = Synth()
+    
+    public var id = UUID()
     
     public var volume: Float {
         set {
@@ -70,6 +78,7 @@ class Synth {
     // MARK: Init
     init(signal: @escaping Signal = Oscillator.sine) {
         audioEngine = AVAudioEngine()
+        
         
         do {
             try AVAudioSession.sharedInstance().setCategory(.ambient)
