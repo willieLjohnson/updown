@@ -68,10 +68,16 @@ class Synth {
     private var signal: Signal
     
     // MARK: Init
-    
     init(signal: @escaping Signal = Oscillator.sine) {
         audioEngine = AVAudioEngine()
         
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.ambient)
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("Failed to set AVAudioSession to category")
+        }
+  
         let mainMixer = audioEngine.mainMixerNode
         let outputNode = audioEngine.outputNode
         let format = outputNode.inputFormat(forBus: 0)

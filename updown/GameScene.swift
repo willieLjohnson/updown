@@ -70,7 +70,12 @@ class GameScene: SKScene {
     
         scoreLabel = childNode(withName: "scoreLabel") as! SKLabelNode
         scoreLabel.attributedText = NSMutableAttributedString(string: "\(score)", attributes: scoreLabelAttr)
-        print("PlayerCategory \(PlayerCategory)")
+        
+    }
+    
+    override func sceneDidLoad() {
+        super.sceneDidLoad()
+        NotificationCenter.default.addObserver(self, selector: #selector(gameMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
     }
 
 
@@ -117,6 +122,10 @@ class GameScene: SKScene {
 
 // MARK: - Private Methods
 private extension GameScene {
+    @objc func gameMovedToBackground() {
+        Synth.shared.volume = 0
+    }
+    
     func createWorld() {
         worldSize = size * 0.9
         worldFrame = CGRect(origin: CGPoint(x: -worldSize.width / 2, y: -worldSize.height / 2), size: worldSize)
