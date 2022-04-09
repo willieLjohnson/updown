@@ -6,6 +6,7 @@
 //
 
 import SpriteKit
+import Foundation
 
 let NoCategory: UInt32 = 1 << 0
 let PlayerCategory: UInt32 = 1 << 1
@@ -21,8 +22,10 @@ class GameScene: SKScene {
     private var scoreLabel = SKLabelNode()
     private var borderLine = SKShapeNode()
 
-    private var enemies = [Int: SKShapeNode]()
+    private var enemies = [Int: Enemy]()
     private var currentEnemyIndex = 0
+    
+    private var sparksEmitter = SKEmitterNode()
     
     private var score = 0
     
@@ -59,6 +62,7 @@ class GameScene: SKScene {
         scoreLabel = childNode(withName: "scoreLabel") as! SKLabelNode
         scoreLabel.attributedText = NSMutableAttributedString(string: "\(score)", attributes: scoreLabelAttr)
         
+        sparksEmitter = SKEmitterNode(fileNamed: "Sparks.sks")!
     }
     
     override func sceneDidLoad() {
@@ -115,7 +119,7 @@ private extension GameScene {
     }
     
     func createWorld() {
-        worldSize = size * 0.9
+        worldSize = size * 0.92
         worldFrame = CGRect(origin: CGPoint(x: -worldSize.width / 2, y: -worldSize.height / 2), size: worldSize)
         self.name = "world"
         
@@ -175,6 +179,7 @@ private extension GameScene {
         
         ball.position = worldFrame.bottom - CGPoint(x: 0, y: ball.frame.size.height * 4)
         addChild(ball)
+
     }
     
     func createPlayer() {
@@ -201,26 +206,11 @@ private extension GameScene {
 
     // TODO: - Create new enemy types or make enemy shape easier to adjust.
     func createEnemy(size: CGSize, position: CGPoint = .zero, color: SKColor = .red) {
-        let enemy = SKShapeNode(rectOf: size)
-        enemy.name = "enemy"
-        enemy.fillColor = color
-        enemy.strokeColor = color.hueWith(saturation: 0.5, brightness: 1, alpha: 1)
-        enemy.addGlow()
-
-        let enemyPhysicsBody = SKPhysicsBody(rectangleOf: enemy.frame.size)
-        enemyPhysicsBody.restitution = 1
-        enemyPhysicsBody.friction = 0
-        enemyPhysicsBody.density = 0
-        enemyPhysicsBody.affectedByGravity = false
-        enemyPhysicsBody.usesPreciseCollisionDetection = true
-        enemyPhysicsBody.categoryBitMask = EnemyCategory
-        enemyPhysicsBody.contactTestBitMask = BallContactCategory
-        enemyPhysicsBody.collisionBitMask = EnemyCategory | BallCollisionCategory | WorldCategory | PlayerCategory
-        enemy.physicsBody = enemyPhysicsBody
-        enemy.zPosition = CGFloat(currentEnemyIndex)
-        enemy.position = position
+        let numberOfSides = Int(Double((score + 100) / 25).rounded())
+        let enemy = Enemy(name: "enemy", shape: SKShapeNode(polygonOfRadius: size.width / 2, vertices: numberOfSides), color: color, position: position)
         enemies[currentEnemyIndex] = enemy
-        addChild(enemy)
+        enemy.zPosition = CGFloat(currentEnemyIndex)
+        addChild(enemy.shape)
         currentEnemyIndex += 1
     }
     
@@ -238,8 +228,8 @@ private extension GameScene {
         ball.physicsBody?.velocity = CGVector(
             dx: Bool.random() ? -bvx  : bvx,
             dy: Bool.random() ? -bvy : bvy
-        )
-        vibrate(.medium)
+        ) 
+        vibrate(.heavy)
     }
     
     func randomStart() {
@@ -316,6 +306,7 @@ extension GameScene: SKPhysicsContactDelegate {
         
         switch(other.name) {
         case "ball":
+            enemyCollisionEffect(enemy: enemy)
             enemy.removeGlow()
 
             enemy.physicsBody!.categoryBitMask = 0
@@ -390,13 +381,52 @@ extension GameScene: SKPhysicsContactDelegate {
     }
     
     func onContact(ball: SKNode, other: SKNode, position: CGPoint) {
+
         switch(other.name) {
         case "world":
             vibrate(.light)
-            borderLine.run(.shake(initialPosition: .zero, duration: 0.1, amplitudeX: .random(in: 5...10), amplitudeY: .random(in: 0...10)))
+            borderLine.run(.shake(initialPosition: .zero, duration: 0.1, amplitudeX: .random(in: 10...15), amplitudeY: .random(in: 10...15)))
         default:
             return
         }
+        
+
+        
+    }
+    
+    func ballCollisionEffect(position: CGPoint) {
+        guard let sparksEmitter = sparksEmitter.copy() as? SKEmitterNode else { return }
+        
+//        sparksEmitter.particleSize = CGSize(width: 5, height: 5)
+        sparksEmitter.position = position
+//        sparksEmitter.particleScale = 1
+        sparksEmitter.zRotation = ball.position.angle(to: position)
+//        sparksEmitter.particleLifetime = 1
+//        sparksEmitter.particleLifetimeRange = 6
+//        spark
+        sparksEmitter.run(.sequence([.wait(forDuration: 0.5), .run({
+            sparksEmitter.removeFromParent()
+        })]))
+        sparksEmitter.particleColor = ball.strokeColor
+        sparksEmitter.particleColorSequence = nil
+
+        addChild(sparksEmitter)
+    }
+    
+    func enemyCollisionEffect(enemy: SKShapeNode) {
+        guard let sparksEmitter = sparksEmitter.copy() as? SKEmitterNode else { return }
+        
+        sparksEmitter.particleSize = enemy.frame.size * 2
+        sparksEmitter.position = enemy.position
+//        sparksEmitter.particleScale = 0.4
+        sparksEmitter.zRotation = ball.position.angle(to: enemy.position)
+        sparksEmitter.run(.sequence([.wait(forDuration: 0.5), .run({
+            sparksEmitter.removeFromParent()
+        })]))
+        sparksEmitter.particleColor = enemy.fillColor
+        sparksEmitter.particleColorSequence = nil
+
+        addChild(sparksEmitter)
     }
     
     func onContact(world: SKNode, other: SKNode, position: CGPoint) {
@@ -420,6 +450,11 @@ extension GameScene: SKPhysicsContactDelegate {
         
         vibrate()
         playSound(bounceSound, volume: 1)
+        
+        
+        if nodeA.name == "ball" || nodeB.name == "ball" {
+            ballCollisionEffect(position: contact.contactPoint)
+        }
         
 //        print(nodeA.name)
 //        print(nodeB.name)

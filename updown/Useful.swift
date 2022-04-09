@@ -13,6 +13,15 @@ import UIKit
 
 import CoreGraphics
 
+
+// MARK: - CGFloat
+extension CGFloat {
+    var degrees: CGFloat {
+        return self * CGFloat(180) / .pi
+    }
+}
+
+
 // MARK: Clamping
 extension Comparable {
     func clamped(to limits: ClosedRange<Self>) -> Self {
@@ -223,6 +232,22 @@ public func * (vector: CGVector, scalar: CGFloat) -> CGVector {
 }
 
 // MARK: CGPOINT
+
+
+extension CGPoint {
+    func angle(to comparisonPoint: CGPoint) -> CGFloat {
+        let originX = comparisonPoint.x - x
+        let originY = comparisonPoint.y - y
+        let bearingRadians = atan2f(Float(originY), Float(originX))
+        var bearingDegrees = CGFloat(bearingRadians).degrees
+
+        while bearingDegrees < 0 {
+            bearingDegrees += 360
+        }
+
+        return bearingDegrees
+    }
+}
 
 // Point v Scalar
 
@@ -493,3 +518,4 @@ extension SKShapeNode {
         glowNode.removeFromParent()
     }
 }
+
